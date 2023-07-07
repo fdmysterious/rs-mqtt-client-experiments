@@ -96,6 +96,8 @@ async fn main() -> Result<(), Box<dyn Error>> {
     let mut router = MqttRouter::new();
 
     router.add_route(&mut client, HelloHandler).await;
+
+    /// wrap router behind an Arc to be shared between contexts
     let router = Arc::new(router);
 
     loop {
@@ -121,29 +123,6 @@ async fn main() -> Result<(), Box<dyn Error>> {
                 println!("Error = {e:?}");
                 return Ok(());
             }
-        }
-    }
-}
-
-async fn hello_handler(client: AsyncClient) {
-    println!("Hello handler!");
-
-    let resp = "Hello back!";
-    client.publish("hello/back", QoS::AtLeastOnce, false, resp.as_bytes())
-        .await
-        .unwrap();
-}
-
-async fn handle(topic: String, client: AsyncClient) -> Result<(), ()> {
-    println!("Handle !");
-    match topic.as_str() {
-        "hello/world" => {
-            hello_handler(client).await;
-            Ok(())
-        },
-
-        _ => {
-            Err(())
         }
     }
 }
